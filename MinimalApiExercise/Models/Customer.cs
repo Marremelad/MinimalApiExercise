@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using MinimalApiExercise.ValidationAttributes;
 
 namespace MinimalApiExercise.Models
 {
@@ -8,13 +9,18 @@ namespace MinimalApiExercise.Models
         [Key]
         public int Id { get; set; }
         
+        [StringLength(35)]
         public required string FirstName { get; set; }
 
+        [StringLength(35)]
         public required string LastName { get; set; }
 
         [EmailAddress]
+        [StringLength(254)]
         public required string Email { get; set; }
-
+        
+        [SwedishPhoneNumber]
+        [StringLength(12)]
         public string? Phone { get; set; }
         
         public virtual List<Order>? Orders { get; set; }

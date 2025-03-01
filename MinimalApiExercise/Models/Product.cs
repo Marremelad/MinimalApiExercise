@@ -7,9 +7,11 @@ namespace MinimalApiExercise.Models
         [Key]
         public int Id { get; set; }
 
-        public string Name { get; set; }
-
-        public string Description { get; set; }
+        [StringLength(35)]
+        public required string Name { get; set; }
+        
+        [StringLength(300)]
+        public string? Description { get; set; }
 
         public decimal Price { get; set; }
         
