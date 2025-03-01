@@ -13,5 +13,7 @@ namespace MinimalApiExercise.Models
         [ForeignKey("Customer")]
         public int CustomerIdFk { get; set; }
         public required Customer Customer { get; set; }
+        
+        public virtual required List<OrderProduct> OrderProducts { get; set; }
     }
 }
