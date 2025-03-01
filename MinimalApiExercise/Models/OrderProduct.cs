@@ -15,6 +15,4 @@ public class OrderProduct
     [ForeignKey("Product")]
     public int ProductIdFk { get; set; }
     public required Product Product { get; set; }
-
-    public virtual List<OrderProduct>? OrderProducts { get; set; }
 }
