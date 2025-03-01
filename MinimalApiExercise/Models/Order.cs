@@ -1,10 +1,17 @@
-﻿namespace MinimalApiExercise.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace MinimalApiExercise.Models
 {
     public class Order
     {
         public int Id { get; set; }
-        public DateTime OrderDate { get; set; }
+        
+        public DateOnly OrderDate { get; set; }
+        
         public int UserId { get; set; }
-        public Customer Customer { get; set; }
+
+        [ForeignKey("Customer")]
+        public int CustomerIdFk { get; set; }
+        public required Customer Customer { get; set; }
     }
 }

@@ -16,9 +16,7 @@ namespace MinimalApiExercise.Models
         public required string Email { get; set; }
 
         public string? Phone { get; set; }
-
-        [ForeignKey("Orders")]
-        public int OrderIdFk { get; set; }
+        
         public virtual List<Order>? Orders { get; set; }
     }
 }
