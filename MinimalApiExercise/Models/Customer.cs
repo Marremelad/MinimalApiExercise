@@ -1,15 +1,24 @@
-﻿namespace MinimalApiExercise.Models
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace MinimalApiExercise.Models
 {
     public class Customer
     {
+        [Key]
         public int Id { get; set; }
         
-        public string Name { get; set; }
+        public required string FirstName { get; set; }
 
-        public string LastName { get; set; }
+        public required string LastName { get; set; }
 
-        public string Email { get; set; }
+        [EmailAddress]
+        public required string Email { get; set; }
 
-        public string Phone { get; set; }
+        public string? Phone { get; set; }
+
+        [ForeignKey("Orders")]
+        public int OrderIdFk { get; set; }
+        public virtual List<Order>? Orders { get; set; }
     }
 }
