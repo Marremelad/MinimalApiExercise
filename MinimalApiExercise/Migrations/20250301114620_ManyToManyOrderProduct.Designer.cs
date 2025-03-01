@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MinimalApiExercise.Data;
 
@@ -11,9 +12,11 @@ using MinimalApiExercise.Data;
 namespace MinimalApiExercise.Migrations
 {
     [DbContext(typeof(StoreDbContext))]
-    partial class StoreDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250301114620_ManyToManyOrderProduct")]
+    partial class ManyToManyOrderProduct
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,19 +33,19 @@ namespace MinimalApiExercise.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Email")
+                    b.Property<string>("CustomerEmail")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FirstName")
+                    b.Property<string>("CustomerFirstName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("LastName")
+                    b.Property<string>("CustomerLastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Phone")
+                    b.Property<string>("CustomerPhone")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -73,11 +76,11 @@ namespace MinimalApiExercise.Migrations
 
             modelBuilder.Entity("MinimalApiExercise.Models.OrderProduct", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("OrderProductId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderProductId"));
 
                     b.Property<int>("OrderIdFk")
                         .HasColumnType("int");
@@ -85,7 +88,7 @@ namespace MinimalApiExercise.Migrations
                     b.Property<int>("ProductIdFk")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.HasKey("OrderProductId");
 
                     b.HasIndex("OrderIdFk");
 
@@ -102,15 +105,15 @@ namespace MinimalApiExercise.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Description")
+                    b.Property<string>("ProductDescription")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("ProductName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("Price")
+                    b.Property<decimal>("ProductPrice")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");

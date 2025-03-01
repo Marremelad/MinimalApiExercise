@@ -6,16 +6,16 @@ namespace MinimalApiExercise.Models
     public class Customer
     {
         [Key]
-        public int CustomerId { get; set; }
+        public int Id { get; set; }
         
-        public required string CustomerFirstName { get; set; }
+        public required string FirstName { get; set; }
 
-        public required string CustomerLastName { get; set; }
+        public required string LastName { get; set; }
 
         [EmailAddress]
-        public required string CustomerEmail { get; set; }
+        public required string Email { get; set; }
 
-        public string? CustomerPhone { get; set; }
+        public string? Phone { get; set; }
         
         public virtual List<Order>? Orders { get; set; }
     }

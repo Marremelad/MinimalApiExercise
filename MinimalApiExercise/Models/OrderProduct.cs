@@ -6,7 +6,7 @@ namespace MinimalApiExercise.Models;
 public class OrderProduct
 {
     [Key]
-    public int OrderProductId { get; set; }
+    public int Id { get; set; }
     
     [ForeignKey("Order")]
     public int OrderIdFk { get; set; }
