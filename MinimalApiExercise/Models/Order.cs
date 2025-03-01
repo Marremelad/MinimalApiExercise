@@ -4,12 +4,10 @@ namespace MinimalApiExercise.Models
 {
     public class Order
     {
-        public int Id { get; set; }
+        public int OrderId { get; set; }
         
         public DateOnly OrderDate { get; set; }
         
-        public int UserId { get; set; }
-
         [ForeignKey("Customer")]
         public int CustomerIdFk { get; set; }
         public required Customer Customer { get; set; }
