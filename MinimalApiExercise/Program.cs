@@ -1,4 +1,5 @@
 
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using MinimalApiExercise.Data;
 using MinimalApiExercise.Models;
@@ -40,6 +41,29 @@ namespace MinimalApiExercise
             {
                 return Results.Ok(context.Customers.ToList());
             });
+
+            app.MapGet("/customers/{id:int}/orders", async (StoreDbContext context, int id) =>
+            {
+                return await context.Customers
+                    .Where(c => c.Id == id)
+                    .Select(c => new
+                    {
+                        CustomerName = $"{c.FirstName} {c.LastName}",
+                        Orders = c.Orders!
+                            .Select(o => new
+                            {
+                                OrderId = o.Id,
+                                OrderedItems = o.OrderProducts
+                                    .Select(op => new
+                                    {
+                                        ProductName = op.Product.Name,
+                                        ProductDescription = op.Product.Description
+                                    })
+                            })
+                    })
+                    .ToListAsync();
+            });
+
 
             app.MapPost("/customers", (StoreDbContext context, Customer customer) =>
             {
