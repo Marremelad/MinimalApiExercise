@@ -36,16 +36,16 @@ namespace MinimalApiExercise
 
             app.UseAuthorization();
 
-            app.MapGet("/users", (StoreDbContext context) =>
+            app.MapGet("/customers", (StoreDbContext context) =>
             {
                 return Results.Ok(context.Customers.ToList());
             });
 
-            app.MapPost("/users", (StoreDbContext context, Customer customer) =>
+            app.MapPost("/customers", (StoreDbContext context, Customer customer) =>
             {
                 context.Customers.Add(customer);
                 context.SaveChanges();
-                return Results.Created($"/users/{customer.Id}", customer);
+                return Results.Created($"/customers/{customer.Id}", customer);
             });
 
             app.MapGet("/products", (StoreDbContext context) =>
