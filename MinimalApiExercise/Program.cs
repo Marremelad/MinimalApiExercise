@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using MinimalApiExercise.Data;
+using MinimalApiExercise.DTOs;
 using MinimalApiExercise.Models;
 
 namespace MinimalApiExercise
@@ -50,11 +51,11 @@ namespace MinimalApiExercise
                     {
                         CustomerName = $"{c.FirstName} {c.LastName}",
                         Orders = c.Orders!
-                            .Select(o => new
+                            .Select(o => new OrderDto
                             {
                                 OrderId = o.Id,
-                                OrderedItems = o.OrderProducts
-                                    .Select(op => new
+                                OrderedProducts = o.OrderProducts
+                                    .Select(op => new ProductDto
                                     {
                                         ProductName = op.Product.Name,
                                         ProductDescription = op.Product.Description
