@@ -14,11 +14,9 @@ namespace MinimalApiExercise.Models
         [StringLength(35)]
         public required string LastName { get; set; }
 
-        [EmailAddress]
         [StringLength(254)]
         public required string Email { get; set; }
         
-        [SwedishPhoneNumber]
         [StringLength(12)]
         public string? Phone { get; set; }
         
