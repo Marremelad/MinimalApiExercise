@@ -45,24 +45,26 @@ namespace MinimalApiExercise
 
             app.MapGet("/customers/{id:int}/orders", async (StoreDbContext context, int id) =>
             {
-                return await context.Customers
+                var customer = await context.Customers
                     .Where(c => c.Id == id)
                     .Select(c => new
                     {
                         CustomerName = $"{c.FirstName} {c.LastName}",
-                        Orders = c.Orders!
-                            .Select(o => new OrderDto
-                            {
-                                OrderId = o.Id,
-                                OrderedProducts = o.OrderProducts
-                                    .Select(op => new ProductDto
-                                    {
-                                        ProductName = op.Product.Name,
-                                        ProductDescription = op.Product.Description
-                                    })
-                            })
+                        Orders = c.Orders!.Select(o => new OrderDto
+                        {
+                            OrderId = o.Id,
+                            OrderedProducts = o.OrderProducts
+                                .Select(op => new ProductDto
+                                {
+                                    ProductId = op.Product.Id,
+                                    ProductName = op.Product.Name,
+                                    ProductDescription = op.Product.Description
+                                })
+                        })
                     })
-                    .ToListAsync();
+                    .FirstOrDefaultAsync();
+
+                return customer == null ? Results.NotFound("Customer does not exist.") : Results.Ok(customer);
             });
 
 
