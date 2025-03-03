@@ -37,6 +37,7 @@ namespace MinimalApiExercise
             app.UseAuthorization();
 
             CustomerEndpoints.RegisterEndpoints(app);
+            ProductEndpoints.RegisterEndpoints(app);
             
             app.Run();
         }

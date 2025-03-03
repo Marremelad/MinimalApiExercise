@@ -7,7 +7,7 @@ using MinimalApiExercise.Models;
 
 namespace MinimalApiExercise.Endpoints;
 
-public class CustomerEndpoints
+public abstract class CustomerEndpoints
 {
     public static void RegisterEndpoints(WebApplication app)
     {
