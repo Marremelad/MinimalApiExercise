@@ -13,7 +13,7 @@ namespace MinimalApiExercise.Models
         [StringLength(300)]
         public string? Description { get; set; }
 
-        [Range(0, double.MaxValue, ErrorMessage = "Price must be a positive number.")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Price must be a positive number.")]
         public decimal Price { get; set; }
 
         
