@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MinimalApiExercise.Data;
 using MinimalApiExercise.Endpoints;
+using MinimalApiExercise.Services;
 
 
 namespace MinimalApiExercise
@@ -22,6 +23,9 @@ namespace MinimalApiExercise
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
+
+            builder.Services.AddScoped<CustomerService>();
+            builder.Services.AddScoped<ProductService>();
 
             var app = builder.Build();
 
