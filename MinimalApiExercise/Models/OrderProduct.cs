@@ -10,9 +10,9 @@ public class OrderProduct
     
     [ForeignKey("Order")]
     public int OrderIdFk { get; set; }
-    public required Order Order { get; set; }
+    public Order? Order { get; set; }
 
     [ForeignKey("Product")]
     public int ProductIdFk { get; set; }
-    public required Product Product { get; set; }
+    public Product? Product { get; set; }
 }

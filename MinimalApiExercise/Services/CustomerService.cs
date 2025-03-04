@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using MinimalApiExercise.Data;
 using MinimalApiExercise.DTOs;
 using MinimalApiExercise.DTOs.CustomerDTOs;
+using MinimalApiExercise.DTOs.OrderDTOs;
 using MinimalApiExercise.Models;
 
 namespace MinimalApiExercise.Services;
@@ -54,12 +55,14 @@ public class CustomerService(StoreDbContext context)
                 Orders = c.Orders!.Select(o => new OrderDto
                 {
                     OrderId = o.Id,
-                    OrderedProducts = o.OrderProducts
+                    CustomerId = o.CustomerIdFk,
+                    OrderedProducts = o.OrderProducts!
                         .Select(op => new ProductDto
                         {
-                            ProductId = op.Product.Id,
+                            ProductId = op.Product!.Id,
                             ProductName = op.Product.Name,
-                            ProductDescription = op.Product.Description
+                            ProductDescription = op.Product.Description,
+                            ProductPrice = op.Product.Price
                         })
                 })
             })

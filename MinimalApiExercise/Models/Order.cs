@@ -11,9 +11,10 @@ namespace MinimalApiExercise.Models
         public DateOnly OrderDate { get; set; }
         
         [ForeignKey("Customer")]
-        public int CustomerIdFk { get; set; }
-        public required Customer Customer { get; set; }
         
-        public virtual required List<OrderProduct> OrderProducts { get; set; }
+        public required int CustomerIdFk { get; set; }
+        public Customer? Customer { get; set; }
+        
+        public virtual  List<OrderProduct>? OrderProducts { get; set; }
     }
 }
