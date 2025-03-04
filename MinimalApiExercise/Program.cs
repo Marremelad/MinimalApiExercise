@@ -26,6 +26,7 @@ namespace MinimalApiExercise
 
             builder.Services.AddScoped<CustomerService>();
             builder.Services.AddScoped<ProductService>();
+            builder.Services.AddScoped<OrderService>();
 
             var app = builder.Build();
 
@@ -42,6 +43,7 @@ namespace MinimalApiExercise
 
             CustomerEndpoints.RegisterEndpoints(app);
             ProductEndpoints.RegisterEndpoints(app);
+            OrderEndpoints.RegisterEndpoints(app);
             
             app.Run();
         }
