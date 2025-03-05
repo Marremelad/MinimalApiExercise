@@ -10,102 +10,149 @@ namespace MinimalApiExercise.Services;
 
 public class CustomerService(StoreDbContext context)
 {
+    private const string OperationsSuccessfulMessage = "Operation successful";
+    private const string NotFoundMessage = "not found";
+    private const string OrderTerminatedMessage = "Order terminated:";
+    
     // Get all customers.
-    public async Task<IResult> GetAllCustomers()
+    public async Task<(int, object)> GetAllCustomers()
     {
-        return Results.Ok(await context.Customers
-            .Select(c => new CustomerDto
-            {
-                CustomerId = c.Id,
-                FirstName = c.FirstName,
-                LastName = c.LastName,
-                Email = c.Email,
-                Phone = c.Phone
+        List<CustomerDto> customers;
+        try
+        {
+            customers = await context.Customers
+                .Select(c => new CustomerDto
+                {
+                    CustomerId = c.Id,
+                    FirstName = c.FirstName,
+                    LastName = c.LastName,
+                    Email = c.Email,
+                    Phone = c.Phone
 
-            })
-            .ToListAsync());
+                }).ToListAsync();
+        }
+        catch (Exception e)
+        {
+            return (1, e);
+        }
+
+        return (0, customers);
     }
 
     // Get customer by ID.
-    public async Task<IResult> GetCustomer(int id)
+    public async Task<(int, object)> GetCustomer(int id)
     {
-        var customer = await context.Customers
-            .Where(c => c.Id == id)
-            .Select(c => new CustomerDto
-            {
-                CustomerId = c.Id,
-                FirstName = c.FirstName,
-                LastName = c.LastName,
-                Email = c.Email,
-                Phone = c.Phone
-            })
-            .FirstOrDefaultAsync();
+        CustomerDto? customer;
+        try
+        {
+            customer = await context.Customers
+                .Where(c => c.Id == id)
+                .Select(c => new CustomerDto
+                {
+                    CustomerId = c.Id,
+                    FirstName = c.FirstName,
+                    LastName = c.LastName,
+                    Email = c.Email,
+                    Phone = c.Phone
+                })
+                .FirstOrDefaultAsync();
 
-        return customer == null ? Results.NotFound("Customer does not exist") : Results.Ok(customer);
+            if (customer == null) return (2, "Customer " + NotFoundMessage);
+
+        }
+        catch (Exception e)
+        {
+            return (1, e);
+        }
+
+        return (0, customer);
     }
     
     // Get customer orders by ID.
-    public async Task<IResult> GetCustomerOrders(int id)
+    public async Task<(int, object)> GetCustomerOrders(int id)
     {
-        var customer = await context.Customers
-            .Where(c => c.Id == id)
-            .Select(c => new
-            {
-                CustomerName = $"{c.FirstName} {c.LastName}",
-                Orders = c.Orders!.Select(o => new OrderDto
+        object? customerOrders;
+        try
+        {
+            customerOrders = await context.Customers
+                .Where(c => c.Id == id)
+                .Select(c => new
                 {
-                    OrderId = o.Id,
-                    CustomerId = o.CustomerIdFk,
-                    OrderedProducts = o.OrderProducts!
-                        .Select(op => new ProductDto
-                        {
-                            ProductId = op.Product!.Id,
-                            ProductName = op.Product.Name,
-                            ProductDescription = op.Product.Description,
-                            ProductPrice = op.Product.Price
-                        })
+                    CustomerName = $"{c.FirstName} {c.LastName}",
+                    Orders = c.Orders!.Select(o => new OrderDto
+                    {
+                        OrderId = o.Id,
+                        CustomerId = o.CustomerIdFk,
+                        OrderedProducts = o.OrderProducts!
+                            .Select(op => new ProductDto
+                            {
+                                ProductId = op.Product!.Id,
+                                ProductName = op.Product.Name,
+                                ProductDescription = op.Product.Description,
+                                ProductPrice = op.Product.Price
+                            })
+                    })
                 })
-            })
-            .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync();
 
-        return customer == null ? Results.NotFound("Customer does not exist.") 
-            : Results.Ok(customer);
+            if (customerOrders == null) return (2, "Customer " + NotFoundMessage);
+        }
+        catch (Exception e)
+        {
+            return (1, e);
+        }
+
+        return (0, customerOrders);
     }
     
     // Create customer.
-    public async Task<IResult> CreateCustomer(CustomerCreateDto newCustomer)
+    public async Task<(int, object)> CreateCustomer(CustomerCreateDto newCustomer)
     {
-        var validationContext = new ValidationContext(newCustomer);
-        var validationResult = new List<ValidationResult>();
-        var isValid = Validator.TryValidateObject(newCustomer, validationContext, validationResult, true);
-
-        if (!isValid) return Results.BadRequest(validationResult.Select(v => v.ErrorMessage));
-        
-        var customer = new Customer
+        try
         {
-            FirstName = newCustomer.FirstName,
-            LastName = newCustomer.LastName,
-            Email = newCustomer.Email,
-            Phone = newCustomer.Phone
-        };
+            var validationContext = new ValidationContext(newCustomer);
+            var validationResult = new List<ValidationResult>();
+            var isValid = Validator.TryValidateObject(newCustomer, validationContext, validationResult, true);
 
-        context.Customers.Add(customer);
-        await context.SaveChangesAsync();
+            if (!isValid) return (3, validationResult.Select(v => v.ErrorMessage));
+        
+            var customer = new Customer
+            {
+                FirstName = newCustomer.FirstName,
+                LastName = newCustomer.LastName,
+                Email = newCustomer.Email,
+                Phone = newCustomer.Phone
+            };
 
-        return Results.Ok("Customer created successfully");
+            context.Customers.Add(customer);
+            await context.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            return (1, e);
+        }
+
+        return (0, OperationsSuccessfulMessage);
     }
 
     // Delete customer.
-    public async Task<IResult> DeleteCustomer(int id)
+    public async Task<(int, object)> DeleteCustomer(int id)
     {
-        var customer = context.Customers
-            .FirstOrDefault(c => c.Id == id);
+        try
+        {
+            var customer = await context.Customers
+                .FirstOrDefaultAsync(c => c.Id == id);
 
-        if (customer == null) return Results.NotFound("Customer does not exist.");
+            if (customer == null) return (2, "Customer " + NotFoundMessage);
 
-        context.Customers.Remove(customer);
-        await context.SaveChangesAsync();
-
-        return Results.Ok("Customer deleted successfully");
+            context.Customers.Remove(customer);
+            await context.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            return (1, e);
+        }
+        
+        return (0, OperationsSuccessfulMessage);
     }
 }

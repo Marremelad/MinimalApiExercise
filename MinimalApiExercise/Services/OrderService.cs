@@ -9,78 +9,109 @@ namespace MinimalApiExercise.Services;
 
 public class OrderService(StoreDbContext context)
 {
+    private const string OperationsSuccessfulMessage = "Operation successful";
+    private const string NotFoundMessage = "not found";
+    private const string OrderTerminatedMessage = "Order terminated:";
+    
     // Get all orders.
-    public async Task<IResult> GetAllOrders()
+    public async Task<(int, object)> GetAllOrders()
     {
-        return Results.Ok(await context.Orders
-            .Select(o => new OrderDto
-            {
-                OrderId = o.Id,
-                CustomerId = o.CustomerIdFk,
-                OrderDate = o.OrderDate,
-                OrderedProducts = o.OrderProducts!
-                    .Select(op => new ProductDto
-                    {
-                        ProductId = op.Product!.Id,
-                        ProductName = op.Product.Name,
-                        ProductDescription = op.Product.Description
-                    })
-            })
-            .ToListAsync());
+        List<OrderDto> orders;
+        
+        try
+        {
+            orders = await context.Orders
+                .Select(o => new OrderDto
+                {
+                    OrderId = o.Id,
+                    CustomerId = o.CustomerIdFk,
+                    OrderDate = o.OrderDate,
+                    OrderedProducts = o.OrderProducts!
+                        .Select(op => new ProductDto
+                        {
+                            ProductId = op.Product!.Id,
+                            ProductName = op.Product.Name,
+                            ProductDescription = op.Product.Description
+                        })
+                })
+                .ToListAsync();
+        }
+        catch (Exception e)
+        {
+            return (1, e);
+        }
+
+        return (0, orders);
     }
     
     // Get order by ID.
-    public async Task<IResult> GetOrder(int id)
+    public async Task<(int, object)> GetOrder(int id)
     {
-        var order = await context.Orders
-            .Where(o => o.Id == id)
-            .Select(o => new OrderDto
-            {
-                OrderId = o.Id,
-                CustomerId = o.CustomerIdFk,
-                OrderDate = o.OrderDate,
-                OrderedProducts = o.OrderProducts!
-                    .Select(op => new ProductDto
-                    {
-                        ProductId = op.Product!.Id,
-                        ProductName = op.Product.Name,
-                        ProductDescription = op.Product.Description
-                    })
-            }).FirstOrDefaultAsync();
+        OrderDto? order;
+        try
+        {
+            order = await context.Orders
+                .Where(o => o.Id == id)
+                .Select(o => new OrderDto
+                {
+                    OrderId = o.Id,
+                    CustomerId = o.CustomerIdFk,
+                    OrderDate = o.OrderDate,
+                    OrderedProducts = o.OrderProducts!
+                        .Select(op => new ProductDto
+                        {
+                            ProductId = op.Product!.Id,
+                            ProductName = op.Product.Name,
+                            ProductDescription = op.Product.Description
+                        })
+                }).FirstOrDefaultAsync();
 
-        return order == null ? Results.NotFound("Order does not exist") : Results.Ok(order);
+            if (order == null) return (2, "Order " + NotFoundMessage);
+        }
+        catch (Exception e)
+        {
+            return (1, e);
+        }
+
+        return (0, order);
     }
     
     // Create order.
-    public async Task<IResult> CreateOrder(OrderCreateDto newOrder)
+    public async Task<(int, object)> CreateOrder(OrderCreateDto newOrder)
     {
-        var validationContext = new ValidationContext(newOrder);
-        var validationResult = new List<ValidationResult>();
-        var isValid = Validator.TryValidateObject(newOrder, validationContext, validationResult, true);
-    
-        if (!isValid) return Results.BadRequest(validationResult.Select(v => v.ErrorMessage));
-
-        var customer = await context.Customers
-            .Where(c => c.Id == newOrder.CustomerId)
-            .FirstOrDefaultAsync();
-
-        if (customer == null) return Results.NotFound("Customer does not exist");
-
-        var order = new Order
+        try
         {
-            OrderDate = DateOnly.FromDateTime(DateTime.Now),
-            CustomerIdFk = newOrder.CustomerId,
-        };
-        
-        context.Orders.Add(order);
-        await context.SaveChangesAsync();
-        
-        return await AddItemsToOrder(newOrder.Items, order);
+            var validationContext = new ValidationContext(newOrder);
+            var validationResult = new List<ValidationResult>();
+            var isValid = Validator.TryValidateObject(newOrder, validationContext, validationResult, true);
 
+            if (!isValid) return (3, validationResult.Select(v => v.ErrorMessage));
+
+            var customer = await context.Customers
+                .Where(c => c.Id == newOrder.CustomerId)
+                .FirstOrDefaultAsync();
+
+            if (customer == null) return (2, "Customer " + NotFoundMessage);
+
+            var order = new Order
+            {
+                OrderDate = DateOnly.FromDateTime(DateTime.Now),
+                CustomerIdFk = newOrder.CustomerId,
+            };
+        
+            context.Orders.Add(order);
+            await context.SaveChangesAsync();
+        
+            return await AddItemsToOrder(newOrder.Items, order);
+        }
+        catch (Exception e)
+        {
+            return (1, e.ToString());
+        }
     }
 
     // Add items to order.
-    private async Task<IResult> AddItemsToOrder(List<string> items, Order order)
+    private async Task<(int, string)> AddItemsToOrder(List<string> items, Order order)
     {
         var addedItems = new List<Product>();
         var excludedItems = new List<string>();
@@ -105,7 +136,7 @@ public class OrderService(StoreDbContext context)
         {
             context.Orders.Remove(order);
             await context.SaveChangesAsync();
-            return Results.BadRequest("Order terminated: No items were added");
+            return (3, OrderTerminatedMessage + " No items were added");
         }
             
         foreach (var orderProduct in addedItems.Select(item => new OrderProduct
@@ -118,9 +149,10 @@ public class OrderService(StoreDbContext context)
             await context.SaveChangesAsync();
         }
 
-        return Results.Ok($"Order created successfully. Items added: {string.Join(", ", addedItems.Select(ai => ai.Name))}." +
-                          $"{(excludedItems.Count == 0 ? "" : $" Items with id: '{string.Join(", ", excludedItems)}': " +
-                                                              $"were not added because they do not exist.")}");
+        return (0, $"Order created successfully. Items added: " +
+                   $"{string.Join(", ", addedItems.Select(ai => ai.Name))}." +
+                   $"{(excludedItems.Count == 0 ? "" 
+                       : $" Items with id: '{string.Join(", ", excludedItems)}': were not added because they do not exist.")}");
 
     }
 }
