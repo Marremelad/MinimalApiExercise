@@ -58,7 +58,6 @@ public class CustomerService(StoreDbContext context)
                 .FirstOrDefaultAsync();
 
             if (customer == null) return (2, "Customer " + NotFoundMessage);
-
         }
         catch (Exception e)
         {
