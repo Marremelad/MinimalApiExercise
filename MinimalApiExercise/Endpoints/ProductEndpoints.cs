@@ -1,4 +1,5 @@
-﻿using MinimalApiExercise.Services;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using MinimalApiExercise.Services;
 
 namespace MinimalApiExercise.Endpoints;
 
@@ -49,7 +50,7 @@ public abstract class ProductEndpoints
         });
         
         // Search for product by price range.
-        app.MapGet("products/priceRange/search",
+        app.MapGet("products/price-range/search",
             async (ProductService productService, decimal? minPrice, decimal? maxPrice) =>
             {
                 var (operationStatus, response) = await productService.SearchProductByPriceRange(minPrice, maxPrice);
@@ -61,5 +62,31 @@ public abstract class ProductEndpoints
                     _ => Results.BadRequest(InvalidOperationMessage)
                 };
             });
+        
+        // Get all products paginated.
+        app.MapGet("products/page/{pageNumber:int?}", async (ProductService productService, int pageNumber = 1) =>
+        {
+            var (operationStatus, response) = await productService.GetAllProductsPaginated(pageNumber);
+
+            return operationStatus switch
+            {
+                0 => Results.Ok(response),
+                1 => Results.Problem(response.ToString(), statusCode: 500),
+                _ => Results.BadRequest(InvalidOperationMessage)
+            };
+        });
+        
+        // Get all products ordered by ascending/descending price.
+        app.MapGet("products/oder-by-ascending{ascending:bool}", async (ProductService productService, bool ascending) =>
+        {
+            var (operationStatus, response) = await productService.GetAllProductsAscendingDescending(ascending);
+
+            return operationStatus switch
+            {
+                0 => Results.Ok(response),
+                1 => Results.Problem(response.ToString(), statusCode: 500),
+                _ => Results.BadRequest(InvalidOperationMessage)
+            };
+        });
     }
 }

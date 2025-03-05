@@ -51,6 +51,19 @@ public abstract class CustomerEndpoints
             
         });
         
+        // Get all customers paginated.
+        app.MapGet("/customers/page/{pageSize:int?}", async (CustomerService customerService, int pageSize = 1) =>
+        {
+            var (operationStatus, response) = await customerService.GetAllCustomersPaginated(pageSize);
+
+            return operationStatus switch
+            {
+                0 => Results.Ok(response),
+                1 => Results.Problem(response.ToString(), statusCode: 500),
+                _ => Results.BadRequest(InvalidOperationMessage)
+            };
+        });
+        
         // Create customer.
         app.MapPost("/customers/create", async (CustomerService customerService, CustomerCreateDto newCustomer) =>
         {

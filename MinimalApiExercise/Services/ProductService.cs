@@ -8,7 +8,6 @@ public class ProductService(StoreDbContext context)
 {
     private const string OperationsSuccessfulMessage = "Operation successful";
     private const string NotFoundMessage = "not found";
-    private const string OrderTerminatedMessage = "Order terminated:";
     
     // Get all products.
     public async Task<(int, object)> GetAllProducts()
@@ -107,6 +106,70 @@ public class ProductService(StoreDbContext context)
                     ProductPrice = p.Price
                 })
                 .ToListAsync();
+        }
+        catch (Exception e)
+        {
+            return (1, e);
+        }
+
+        return (0, products);
+    }
+
+    // Get all products paginated.
+    public async Task<(int, object)> GetAllProductsPaginated(int pageNumber = 1, int pageSize = 3)
+    {
+        int totalRecords;
+        List<ProductDto> products;
+        try
+        {
+            totalRecords = await context.Products.CountAsync();
+            products = await context.Products
+                .OrderBy(p => p.Id)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(p => new ProductDto
+                {
+                    ProductId = p.Id,
+                    ProductName = p.Name,
+                    ProductDescription = p.Description,
+                    ProductPrice = p.Price
+                })
+                .ToListAsync();
+        }
+        catch (Exception e)
+        {
+            return (1, e);
+        }
+
+        return (0, new
+        {
+            Records = $"{pageSize} out of {totalRecords}",
+            Products = products
+        });
+    }
+
+    // Get all products ordered by ascending/descending price.
+    public async Task<(int, object)> GetAllProductsAscendingDescending(bool ascending)
+    {
+        List<ProductDto> products;
+        try
+        {
+            products = await context.Products
+                .Select(p => new ProductDto
+                {
+                    ProductId = p.Id,
+                    ProductName = p.Name,
+                    ProductDescription = p.Description,
+                    ProductPrice = p.Price
+                })
+                .ToListAsync();
+
+            if (!ascending)
+            {
+                products = products
+                    .OrderByDescending(p => p.ProductPrice)
+                    .ToList();
+            }
         }
         catch (Exception e)
         {

@@ -12,7 +12,6 @@ public class CustomerService(StoreDbContext context)
 {
     private const string OperationsSuccessfulMessage = "Operation successful";
     private const string NotFoundMessage = "not found";
-    private const string OrderTerminatedMessage = "Order terminated:";
     
     // Get all customers.
     public async Task<(int, object)> GetAllCustomers()
@@ -102,6 +101,34 @@ public class CustomerService(StoreDbContext context)
         }
 
         return (0, customerOrders);
+    }
+    
+    // Get all customers paginated.
+    public async Task<(int, object)> GetAllCustomersPaginated(int pageNumber = 1, int pageSize = 3)
+    {
+        List<CustomerDto> customers;
+        try
+        {
+             customers = await context.Customers
+                .OrderBy(c => c.Id)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(c => new CustomerDto
+                {
+                    CustomerId = c.Id,
+                    FirstName = c.FirstName,
+                    LastName = c.LastName,
+                    Email = c.Email,
+                    Phone = c.Phone
+                })
+                .ToListAsync();
+        }
+        catch (Exception e)
+        {
+            return (1, e);
+        }
+
+        return (0, customers);
     }
     
     // Create customer.
